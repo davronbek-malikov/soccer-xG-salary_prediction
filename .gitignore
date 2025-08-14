@@ -1,0 +1,25 @@
+# Python virtual environment
+.venv/
+
+# Data (don't commit large or sensitive files)
+data/raw/*
+data/processed/*
+data/output/*
+
+# Optionally keep small metrics files
+!data/processed/metrics.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Streamlit cache (optional)
+.streamlit/
