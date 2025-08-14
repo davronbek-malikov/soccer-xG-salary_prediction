@@ -31,7 +31,7 @@ If you find this repository useful, please ⭐ it — it motivates continued upd
 - 🗃️ SQL  
 
 You can find more about me:
-- GitHub: [@your-github](https://github.com/davronbek-malikov)
+- GitHub: [[@github](https://github.com/davronbek-malikov)](https://github.com/davronbek-malikov)
 - LinkedIn: [Your LinkedIn](https://linkedin.com/in/your-profile)
 - Email: [davronbekmalikov96@gmail.com](mailto:davronbekmalikov96@gmail.com)
 
