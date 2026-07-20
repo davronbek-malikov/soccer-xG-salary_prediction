@@ -1,12 +1,14 @@
 """
-Hugging Face Spaces entry point.
+Render.com / Gradio app entry point.
 
 On cold start:
   1. Loads raw CSV data from data/raw/
-  2. Engineers features
-  3. Trains a fast ensemble (RF + XGBoost + LightGBM → Stacking)
-  4. Caches model to .cache/model.pkl so restarts are instant
-  5. Launches Gradio UI with a public link
+  2. Engineers features (no target used)
+  3. Trains XGBoost (lightweight — fits in Render free 512 MB RAM)
+  4. Caches model so UptimeRobot wake-ups after sleep skip retraining
+  5. Serves Gradio UI on PORT env var (set by Render)
+
+UptimeRobot pings / every 5 min → keeps Render free tier awake 24/7.
 """
 
 import os, sys, warnings
@@ -19,19 +21,19 @@ warnings.filterwarnings("ignore")
 sys.path.insert(0, str(Path(__file__).parent))
 
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import Ridge
-from sklearn.ensemble import StackingRegressor, RandomForestRegressor
 from xgboost import XGBRegressor
-from lightgbm import LGBMRegressor
 
-from src.logger          import get_logger
-from src.data_loader     import DataLoader
+from src.logger           import get_logger
+from src.data_loader      import DataLoader
 from src.feature_engineer import FeatureEngineer
-from src.preprocessor    import Preprocessor
+from src.preprocessor     import Preprocessor
 
 import gradio as gr
 
-log = get_logger("spaces_app")
+log = get_logger("render_app")
+
+# Render provides PORT; fall back to 7860 for local runs
+PORT = int(os.environ.get("PORT", 7860))
 
 CACHE_DIR   = Path(".cache")
 MODEL_PATH  = CACHE_DIR / "model.pkl"
@@ -45,7 +47,7 @@ POSITIONS = ["F S", "M S", "D", "GK", "F M S", "M", "D M", "F"]
 
 # ── train once, cache for restarts ──────────────────────────────────
 def train_and_cache():
-    log.info("Cold start — training model (this takes ~2 minutes)...")
+    log.info("Cold start — training XGBoost (~40 s on Render free CPU)...")
     CACHE_DIR.mkdir(exist_ok=True)
 
     loader = DataLoader(RAW_DIR, SALARY_PATH)
@@ -60,22 +62,15 @@ def train_and_cache():
     prep = Preprocessor()
     Xp   = prep.fit_transform(X_tr)
 
-    estimators = [
-        ("rf",   RandomForestRegressor(n_estimators=200, max_depth=10,
-                                       random_state=42, n_jobs=-1)),
-        ("xgb",  XGBRegressor(n_estimators=300, learning_rate=0.05,
-                               max_depth=6, subsample=0.8,
-                               random_state=42, verbosity=0, n_jobs=-1)),
-        ("lgbm", LGBMRegressor(n_estimators=300, learning_rate=0.05,
-                                num_leaves=63, subsample=0.8,
-                                random_state=42, verbose=-1, n_jobs=-1)),
-    ]
-    model = StackingRegressor(estimators=estimators,
-                              final_estimator=Ridge(alpha=1.0),
-                              cv=3, n_jobs=-1)
+    # Lightweight config: fits comfortably inside Render's 512 MB RAM
+    model = XGBRegressor(
+        n_estimators=200, learning_rate=0.05, max_depth=6,
+        subsample=0.8, colsample_bytree=0.8,
+        random_state=42, verbosity=0, n_jobs=1,
+    )
     model.fit(Xp, y_tr)
 
-    # Safe: saving our own sklearn Pipeline and StackingRegressor only.
+    # Safe: saving our own XGBRegressor and sklearn Pipeline only.
     joblib.dump(model, MODEL_PATH)
     prep.save(str(PREP_PATH))
     log.info("Model cached → .cache/")
@@ -84,8 +79,8 @@ def train_and_cache():
 
 def load_or_train():
     if MODEL_PATH.exists() and PREP_PATH.exists():
-        log.info("Loading cached model...")
-        # Safe: loading files written by train_and_cache() above.
+        log.info("Loading cached model (skipping retraining)...")
+        # Safe: loading files written by train_and_cache() above — our own XGBRegressor.
         model = joblib.load(MODEL_PATH)
         prep  = Preprocessor.load(str(PREP_PATH))
         fe    = FeatureEngineer()
@@ -95,7 +90,7 @@ def load_or_train():
 
 
 model, prep, fe = load_or_train()
-log.info("Ready.")
+log.info("Ready — serving on port %d", PORT)
 
 
 # ── prediction function ──────────────────────────────────────────────
@@ -201,4 +196,5 @@ _Trained on Bundesliga · La Liga · Serie A · seasons 2014/15 – 2021/22_
     )
 
 if __name__ == "__main__":
-    demo.launch()
+    # server_name="0.0.0.0" required so Render's router can reach the app
+    demo.launch(server_name="0.0.0.0", server_port=PORT, share=False)
