@@ -15,6 +15,14 @@ short_description: Predict soccer player salaries using ML (xG, assists, league.
 
 Predicting professional soccer players’ salaries based on expected goals (xG) and performance data using Machine Learning.
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-46E3B7?style=flat&logo=render&logoColor=white)](https://soccer-xg-salary-prediction.onrender.com)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-FF6600?style=flat&logoColor=white)](https://xgboost.readthedocs.io/)
+[![Gradio](https://img.shields.io/badge/Gradio-FF7C00?style=flat&logo=gradio&logoColor=white)](https://gradio.app/)
+
+> 🚀 **[Try the live demo →](https://soccer-xg-salary-prediction.onrender.com)**  
+> Input a player’s season stats and get an instant salary prediction (£/year, week, month).
+
 ---
 
 ## 👋 About This Repository and Author
