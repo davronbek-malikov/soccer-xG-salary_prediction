@@ -1,3 +1,16 @@
+---
+title: Soccer Salary Predictor
+emoji: ⚽
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: "4.44.0"
+app_file: app.py
+pinned: false
+license: mit
+short_description: Predict soccer player salaries using ML (xG, assists, league...)
+---
+
 # ⚽ soccer-xG-salary_prediction
 
 Predicting professional soccer players’ salaries based on expected goals (xG) and performance data using Machine Learning.
