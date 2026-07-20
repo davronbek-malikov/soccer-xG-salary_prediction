@@ -1,8 +1,25 @@
-new-package==0.0.1
-pandas
-numpy
-matplotlib
-seaborn 
+# Core data
+pandas>=2.0
+numpy>=1.26
 openpyxl
 xlrd
-scikit-learn
+
+# ML
+scikit-learn>=1.4
+xgboost>=2.0
+lightgbm>=4.0
+optuna>=3.5
+
+# Explainability
+shap>=0.45
+
+# Visualisation
+matplotlib>=3.8
+seaborn>=0.13
+
+# Demo
+gradio>=4.0
+
+# Dev / notebook
+jupyterlab
+ipykernel
