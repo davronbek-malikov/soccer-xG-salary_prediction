@@ -419,7 +419,7 @@ On cold start, the app:
 
 ## 🙋‍♂️ Author
 
-**Davronbek Malikov** — PhD in AI Convergence Engineering
+**Davronbek Malikov** — PhD in AI Convergence Engineering · LLM, ML & Deep Learning Engineer · AI Team Lead
 
 - 🌐 [Portfolio](https://davronbek-portfolio.vercel.app)
 - 💼 [LinkedIn](https://www.linkedin.com/in/davronbek-malikov)
