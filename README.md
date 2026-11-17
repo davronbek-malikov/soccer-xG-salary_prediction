@@ -14,7 +14,7 @@ short_description: Predict soccer player salaries using ML (xG, assists, league.
 # ⚽ Soccer Player Salary Predictor
 
 > **Can a player’s on-pitch statistics predict their annual salary?**  
-> This project answers that question with an industry-level ML pipeline — from raw data to a live interactive demo.
+> This project answers that question with an industry-level ML pipeline, from raw data to a live interactive demo.
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-46E3B7?style=flat&logo=render&logoColor=white)](https://soccer-xg-salary-prediction.onrender.com)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
@@ -53,7 +53,7 @@ Input any player’s season statistics and get an instant salary prediction in �
 Salary determination in professional football is complex and often opaque. This project builds a **production-quality ML pipeline** that predicts a player’s annual gross salary (£/year) from their season-level performance statistics.
 
 **What makes this industry-level:**
-- All code is modular — classes in `src/`, imported by scripts and notebooks
+- All code is modular, classes in `src/`, imported by scripts and notebooks
 - Strict data leakage prevention enforced throughout
 - Three tiers of models: Baseline → Improved → Ensemble
 - Hyperparameter tuning with Optuna (Bayesian optimisation, 60 trials)
@@ -62,7 +62,7 @@ Salary determination in professional football is complex and often opaque. This 
 - Live Gradio demo deployed on Render, kept alive 24/7 via UptimeRobot
 
 **Published research:** This project is linked to a peer-reviewed SCIE publication:  
-📄 [Predicting Soccer Player Salaries with Both Traditional and Automated Machine Learning Approaches](https://doi.org/10.3390/app15148108) — *Applied Sciences, 2025* (17% accuracy improvement)
+📄 [Predicting Soccer Player Salaries with Both Traditional and Automated Machine Learning Approaches](https://doi.org/10.3390/app15148108): *Applied Sciences, 2025* (17% accuracy improvement)
 
 ---
 
@@ -76,7 +76,7 @@ Salary determination in professional football is complex and often opaque. This 
 | **Salary data** | Capology gross annual salary (£/year) |
 | **Rows after merge & filter** | ~4,500 player-season records with valid salary |
 
-**Key preprocessing decision:** Salary rows with missing or zero values are **dropped entirely** — they are never imputed. Imputing target values before splitting is one of the most common data leakage bugs in ML projects.
+**Key preprocessing decision:** Salary rows with missing or zero values are **dropped entirely**: they are never imputed. Imputing target values before splitting is one of the most common data leakage bugs in ML projects.
 
 ---
 
@@ -145,7 +145,7 @@ Data leakage is when information from the test set (or the target variable) leak
 
 | Bug | Where | Fix |
 |-----|-------|-----|
-| Salary imputed with mean before split | `fill_missing_values()` | Drop null salary rows entirely — never impute the target |
+| Salary imputed with mean before split | `fill_missing_values()` | Drop null salary rows entirely, never impute the target |
 | StandardScaler fitted on full dataset | `scale_numeric()` | `scaler.fit()` on X_train only, `transform()` on X_test |
 | LabelEncoder fitted on full dataset | `encode_categorical()` | `OrdinalEncoder` fitted on X_train only |
 
@@ -162,7 +162,7 @@ The `Preprocessor` class uses a sklearn `ColumnTransformer` pipeline that makes 
 
 ## ⚙️ Feature Engineering
 
-21 new features are derived from raw statistics — **the target (salary) is never used**.
+21 new features are derived from raw statistics, **the target (salary) is never used**.
 
 ### Per-game rate features
 | Feature | Formula |
@@ -207,7 +207,7 @@ The `Preprocessor` class uses a sklearn `ColumnTransformer` pipeline that makes 
 
 ## 🤖 Modeling Strategy
 
-### Stage 1 — Baseline Models
+### Stage 1: Baseline Models
 Weak but interpretable. These establish the performance floor.
 
 | Model | Purpose |
@@ -217,7 +217,7 @@ Weak but interpretable. These establish the performance floor.
 | Lasso | L1-regularised, implicit feature selection |
 | Decision Tree (depth=5) | Non-linear but shallow baseline |
 
-### Stage 2 — Improved Models
+### Stage 2: Improved Models
 Ensemble tree methods that handle non-linearity and interactions.
 
 | Model | Key Config |
@@ -227,14 +227,14 @@ Ensemble tree methods that handle non-linearity and interactions.
 | XGBoost | 400 trees, lr=0.05, colsample_bytree=0.8 |
 | LightGBM | 400 trees, num_leaves=63, subsample=0.8 |
 
-### Stage 3 — Ensemble Models
+### Stage 3: Ensemble Models
 Combining the strongest Stage 2 models.
 
 **Stacking (RF + XGBoost_Tuned + LightGBM → Ridge meta-learner)**  
 Each base model’s out-of-fold predictions become features for the Ridge meta-learner. This learns *how to weight* each model’s prediction.
 
 **Voting (RF + XGBoost_Tuned + LightGBM, simple average)**  
-Averages predictions from all three models — reduces variance without adding complexity.
+Averages predictions from all three models, reduces variance without adding complexity.
 
 ### Target transformation
 Salary is **right-skewed** (a few superstars earn 50× the median). Applying `log1p()` before training and `expm1()` after prediction:
@@ -246,7 +246,7 @@ Salary is **right-skewed** (a few superstars earn 50× the median). Applying `lo
 
 ## 🔬 Hyperparameter Tuning (Optuna)
 
-XGBoost is tuned using **Optuna’s TPE (Tree-structured Parzen Estimator)** sampler — a Bayesian optimisation method that is far more efficient than grid search.
+XGBoost is tuned using **Optuna’s TPE (Tree-structured Parzen Estimator)** sampler, a Bayesian optimisation method that is far more efficient than grid search.
 
 **Search space (60 trials):**
 
@@ -267,20 +267,20 @@ XGBoost is tuned using **Optuna’s TPE (Tree-structured Parzen Estimator)** sam
 
 ## 🔎 SHAP Explainability
 
-SHAP (SHapley Additive exPlanations) answers **why** the model predicted a specific salary — not just what it predicted.
+SHAP (SHapley Additive exPlanations) answers **why** the model predicted a specific salary, not just what it predicted.
 
 ### Global explanations
 | Plot | What it shows |
 |------|--------------|
 | **Beeswarm** | Each dot = one player. Position on x-axis = SHAP value (salary impact). Colour = feature value (red=high, blue=low). Shows direction + magnitude for every feature. |
-| **Bar chart** | Mean absolute SHAP value per feature — overall importance ranking. |
+| **Bar chart** | Mean absolute SHAP value per feature, overall importance ranking. |
 | **Engineered feature impact** | Same bar chart but **blue = engineered feature**, grey = raw feature. Proves whether feature engineering added value. |
 
 ### Local explanations
 | Plot | What it shows |
 |------|--------------|
 | **Waterfall** | For one specific player: each feature’s contribution to push the prediction above/below the baseline (average log-salary). |
-| **Force plot (HTML)** | Interactive version of waterfall — open in browser, hover for exact values. |
+| **Force plot (HTML)** | Interactive version of waterfall, open in browser, hover for exact values. |
 
 All SHAP plots are saved to `visuals/` after running the pipeline.
 
@@ -402,7 +402,7 @@ Prints a local URL + a **public shareable link** (valid 72 hours) via `share=Tru
 ### 4. Or use the live deployment
 
 🌐 **[https://soccer-xg-salary-prediction.onrender.com](https://soccer-xg-salary-prediction.onrender.com)**  
-No installation required — runs 24/7.
+No installation required, runs 24/7.
 
 ---
 
@@ -419,7 +419,7 @@ On cold start, the app:
 
 ## 🙋‍♂️ Author
 
-**Davronbek Malikov** — PhD in AI Convergence Engineering · LLM, ML & Deep Learning Engineer · AI Team Lead
+**Davronbek Malikov**: PhD in AI Convergence Engineering · LLM, ML & Deep Learning Engineer · AI Team Lead
 
 - 🌐 [Portfolio](https://davronbek-portfolio.vercel.app)
 - 💼 [LinkedIn](https://www.linkedin.com/in/davronbek-malikov)
@@ -428,4 +428,4 @@ On cold start, the app:
 
 ---
 
-*If you find this useful, please ⭐ the repo — it helps others discover the project.*
+*If you find this useful, please ⭐ the repo, it helps others discover the project.*
